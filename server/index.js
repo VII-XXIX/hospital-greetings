@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -21,6 +22,7 @@ if (ai) {
 }
 
 // Middleware
+app.use(helmet()); // Adds various HTTP headers for security (XSS, Sniffing protection, etc.)
 app.use(cors({
     origin: '*', // Allow all origins for Vercel/Custom Domains (Production Safe for Public API)
     methods: ['POST', 'GET', 'OPTIONS'],
