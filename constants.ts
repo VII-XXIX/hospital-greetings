@@ -176,11 +176,14 @@ export const FESTIVALS: Festival[] = [
   },
   {
     id: 'valentine',
-    name: 'Valentine\'s Day',
+    name: "Valentine's Day",
     date: 'Feb 14',
     dateIso: '2025-02-14',
     color: 'bg-pink-100 text-pink-800',
     templates: [
+      createAssetTemplate('val-1', 'Soft Romance', THEMES.pink, 'organic'),
+      createAssetTemplate('val-2', 'Modern Love', THEMES.pink, 'geometric'),
+      createAssetTemplate('val-3', 'Sweet Gradient', THEMES.pink, 'gradient'),
       { id: 'val-batch-1', imageUrl: '/templates/valentine_batch_1.jpg', thumbnailUrl: '/templates/valentine_batch_1.jpg', alt: "Valentine's Day Template 1" },
       { id: 'val-batch-2', imageUrl: '/templates/valentine_batch_2.jpg', thumbnailUrl: '/templates/valentine_batch_2.jpg', alt: "Valentine's Day Template 2" },
       { id: 'val-batch-3', imageUrl: '/templates/valentine_batch_3.jpg', thumbnailUrl: '/templates/valentine_batch_3.jpg', alt: "Valentine's Day Template 3" },
