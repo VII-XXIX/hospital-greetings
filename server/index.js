@@ -22,8 +22,8 @@ if (ai) {
 
 // Middleware
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
-    methods: ['POST', 'GET'],
+    origin: '*', // Allow all origins for Vercel/Custom Domains (Production Safe for Public API)
+    methods: ['POST', 'GET', 'OPTIONS'],
 }));
 app.use(express.json({ limit: '10mb' }));
 
