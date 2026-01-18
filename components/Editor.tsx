@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Download, Wand2, RefreshCcw, Share2, Type, Palette, Loader2 } from 'lucide-react';
+import { Download, Wand2, RefreshCcw, Share2, Type, Palette, Loader2, ChevronRight } from 'lucide-react';
 import { CardState } from '../types';
 import { generateAiWish } from '../services/geminiService';
 import { FONT_OPTIONS, COLOR_OPTIONS, HOSPITAL_LOGO_BASE64 } from '../constants';
@@ -24,6 +24,7 @@ export const Editor: React.FC<EditorProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Default dimensions
   // Dynamic dimensions based on aspect ratio
@@ -353,243 +354,276 @@ export const Editor: React.FC<EditorProps> = ({
       {/* Controls */}
       <div className="bg-surface p-6 sm:p-8 rounded-3xl shadow-card border border-white order-2 lg:order-1">
 
-        {/* Layout Selection (New) */}
+        {/* Section: Content (PRIORITY) */}
         <div className="mb-8 pb-8 border-b border-gray-100">
           <h3 className="text-sm font-bold text-textSec uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Share2 className="w-4 h-4" /> Card Layout
+            <Type className="w-4 h-4" /> Personalize Content
           </h3>
-          <div className="flex bg-gray-100 p-1.5 rounded-xl">
-            {[
-              { id: 'square', label: 'Post (Square)', ratio: '1:1' },
-              { id: 'portrait', label: 'Card (Portrait)', ratio: '4:5' },
-              { id: 'story', label: 'Story (Full)', ratio: '9:16' }
-            ].map((layout) => (
-              <button
-                key={layout.id}
-                onClick={() => onUpdateStyle('aspectRatio', layout.id)}
-                className={`flex-1 py-3 px-2 rounded-lg text-xs font-bold transition-all flex flex-col items-center gap-1 ${cardState.aspectRatio === layout.id
-                  ? 'bg-white text-primary shadow-sm ring-1 ring-black/5'
-                  : 'text-gray-500 hover:text-textMain hover:bg-white/50'
-                  }`}
-              >
-                <span>{layout.label}</span>
-                <span className="text-[10px] opacity-60 font-normal">{layout.ratio}</span>
-              </button>
-            ))}
+
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-textSec mb-2 pl-1">From Name</label>
+                <input
+                  type="text"
+                  value={cardState.senderName}
+                  onChange={(e) => onUpdateSender(e.target.value)}
+                  placeholder="e.g. Dr. Anand"
+                  className="w-full p-3 bg-cream border-2 border-transparent rounded-xl focus:bg-white focus:border-primary/30 outline-none transition-all text-sm"
+                />
+              </div>
+              <div>
+                {/* Replaced 'To' with 'Festive Name' conceptual equivalent if 'To' was deemed less important, 
+                     but user asked for 'festive name is important' which usually implies the greeting text or the festival name itself. 
+                     The current codebase has 'Recipient Name' as 'To'. 
+                     The user said "festive name is important". 
+                     If 'Festive Name' refers to the Festival Name itself, it's already selected. 
+                     If it refers to a custom text for the festival, it might be the message.
+                     The user also said "from name sender is import".
+                     I will keep 'To' but maybe rename label if needed, but for now prioritization is the key.
+                     Let's put 'From' and 'To' first as requested.
+                 */}
+                <label className="block text-sm font-medium text-textSec mb-2 pl-1">To (Optional)</label>
+                <input
+                  type="text"
+                  value={cardState.recipientName}
+                  onChange={(e) => onUpdateRecipient(e.target.value)}
+                  placeholder="e.g. Priya"
+                  className="w-full p-3 bg-cream border-2 border-transparent rounded-xl focus:bg-white focus:border-primary/30 outline-none transition-all text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2 pl-1">
+                <label className="block text-sm font-medium text-textSec">Message</label>
+                <button
+                  onClick={handleGenerateWish}
+                  disabled={isGenerating}
+                  className="text-xs flex items-center gap-1.5 text-primary hover:text-primary/80 font-bold bg-primary/5 px-3 py-1.5 rounded-full hover:bg-primary/10 transition-colors disabled:opacity-50"
+                >
+                  {isGenerating ? <RefreshCcw className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+                  {isGenerating ? 'Drafting...' : 'AI Reword'}
+                </button>
+              </div>
+              <textarea
+                value={cardState.customMessage}
+                onChange={(e) => onUpdateMessage(e.target.value)}
+                placeholder={isGenerating ? "Translating..." : `Write your warm ${cardState.selectedFestival?.name} wish here...`}
+                rows={3}
+                maxLength={100}
+                className="w-full p-4 bg-cream border-2 border-transparent rounded-2xl focus:bg-white focus:border-primary/30 focus:ring-4 focus:ring-primary/10 outline-none transition-all resize-none placeholder-gray-400 text-textMain"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Section: Style Customization */}
-        <div className="mb-8 pb-8 border-b border-gray-100">
-          <h3 className="text-sm font-bold text-textSec uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Palette className="w-4 h-4" /> Customize Style
-          </h3>
+        {/* Section: Advanced Styling (Collapsible) */}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors text-left group"
+          >
+            <span className="font-bold text-textMain flex items-center gap-2">
+              <Palette className="w-4 h-4 text-textSec group-hover:text-primary transition-colors" />
+              Advanced Options
+            </span>
+            <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${showAdvanced ? 'rotate-90' : ''}`} />
+          </button>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Font Selection */}
-            <div>
-              <label className="text-xs font-semibold text-textMain mb-2 block">Typography</label>
-              <div className="grid grid-cols-2 gap-2">
-                {FONT_OPTIONS.map((font) => (
-                  <button
-                    key={font.id}
-                    onClick={() => onUpdateStyle('fontFamily', font.id)}
-                    className={`px-3 py-2 rounded-lg text-sm border transition-all ${cardState.fontFamily === font.id
-                      ? 'bg-primary text-white border-primary shadow-md'
-                      : 'bg-white text-textMain border-gray-200 hover:border-primary/50'
-                      }`}
-                    style={{ fontFamily: font.family }}
-                  >
-                    {font.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div className={`grid transition-all duration-300 ease-in-out overflow-hidden ${showAdvanced ? 'grid-rows-[1fr] opacity-100 mt-6' : 'grid-rows-[0fr] opacity-0'}`}>
+            <div className="min-h-0">
 
-            {/* Color Selection */}
-            <div>
-              <label className="text-xs font-semibold text-textMain mb-2 block">Text Color</label>
-              <div className="flex gap-3">
-                {COLOR_OPTIONS.map((color) => (
-                  <button
-                    key={color.id}
-                    onClick={() => onUpdateStyle('textColor', color.value)}
-                    className={`w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center ${cardState.textColor === color.value
-                      ? 'border-primary scale-110 shadow-md ring-2 ring-primary/20'
-                      : 'border-gray-200 hover:scale-105'
-                      }`}
-                    style={{ backgroundColor: color.value }}
-                    title={color.label}
-                  >
-                    {cardState.textColor === color.value && (
-                      <div className={`w-2.5 h-2.5 rounded-full ${['white', 'gold'].includes(color.id) ? 'bg-black' : 'bg-white'}`} />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Font Size Selection */}
-          <div className="mt-6 pt-6 border-t border-gray-100">
-            <label className="text-xs font-bold text-textMain mb-3 block uppercase tracking-wider">Font Size</label>
-            <div className="flex gap-2">
-              {['small', 'medium', 'large'].map((size) => (
-                <button
-                  key={size}
-                  onClick={() => onUpdateStyle('fontSize', size)}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl border-2 transition-all uppercase tracking-wide ${cardState.fontSize === size
-                    ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105'
-                    : 'bg-white text-textSec border-gray-100 hover:border-primary/30 hover:text-primary'
-                    }`}
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
-            {/* Advanced Layout Controls */}
-            <div className="mt-6 pt-6 border-t border-gray-100 space-y-4">
-              <h3 className="text-xs font-bold text-textMain uppercase tracking-wider mb-2">Advanced Layout</h3>
-
-              {/* Logo Position */}
-              <div>
-                <label className="text-xs text-textSec mb-1 block">Logo Position</label>
-                <div className="grid grid-cols-2 gap-2 max-w-[120px]">
-                  {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map(pos => (
+              {/* Layout Selection */}
+              <div className="mb-8 pb-8 border-b border-gray-100">
+                <h3 className="text-xs font-bold text-textSec uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Share2 className="w-3 h-3" /> Card Layout
+                </h3>
+                <div className="flex bg-gray-100 p-1.5 rounded-xl">
+                  {[
+                    { id: 'square', label: 'Post (Square)', ratio: '1:1' },
+                    { id: 'portrait', label: 'Card (Portrait)', ratio: '4:5' },
+                    { id: 'story', label: 'Story (Full)', ratio: '9:16' }
+                  ].map((layout) => (
                     <button
-                      key={pos}
-                      onClick={() => onUpdateStyle('logoPosition', pos)}
-                      className={`h-8 rounded-md border-2 transition-all ${cardState.logoPosition === pos
-                        ? 'bg-primary border-primary'
-                        : 'bg-gray-100 border-transparent hover:bg-gray-200'
+                      key={layout.id}
+                      onClick={() => onUpdateStyle('aspectRatio', layout.id)}
+                      className={`flex-1 py-3 px-2 rounded-lg text-xs font-bold transition-all flex flex-col items-center gap-1 ${cardState.aspectRatio === layout.id
+                        ? 'bg-white text-primary shadow-sm ring-1 ring-black/5'
+                        : 'text-gray-500 hover:text-textMain hover:bg-white/50'
                         }`}
-                      title={pos.replace('-', ' ')}
-                    />
+                    >
+                      <span>{layout.label}</span>
+                      <span className="text-[10px] opacity-60 font-normal">{layout.ratio}</span>
+                    </button>
                   ))}
                 </div>
               </div>
 
-              {/* Sliders Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Text Offset */}
-                <div>
-                  <label className="text-xs text-textSec mb-1 block flex justify-between">
-                    <span>Text Height</span>
-                    <span className="text-[10px] bg-gray-100 px-1 rounded">{cardState.textYOffset || 0}</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="-50" max="400" step="10"
-                    value={cardState.textYOffset || 0}
-                    onChange={(e) => onUpdateStyle('textYOffset', parseInt(e.target.value))}
-                    className="w-full accent-primary h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                  />
+              {/* Style Customization */}
+              <div className="mb-6">
+                <h3 className="text-xs font-bold text-textSec uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Palette className="w-3 h-3" /> Customize Style
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {/* Font Selection */}
+                  <div>
+                    <label className="text-xs font-semibold text-textMain mb-2 block">Typography</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {FONT_OPTIONS.map((font) => (
+                        <button
+                          key={font.id}
+                          onClick={() => onUpdateStyle('fontFamily', font.id)}
+                          className={`px-3 py-2 rounded-lg text-sm border transition-all ${cardState.fontFamily === font.id
+                            ? 'bg-primary text-white border-primary shadow-md'
+                            : 'bg-white text-textMain border-gray-200 hover:border-primary/50'
+                            }`}
+                          style={{ fontFamily: font.family }}
+                        >
+                          {font.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Color Selection */}
+                  <div>
+                    <label className="text-xs font-semibold text-textMain mb-2 block">Text Color</label>
+                    <div className="flex gap-3">
+                      {COLOR_OPTIONS.map((color) => (
+                        <button
+                          key={color.id}
+                          onClick={() => onUpdateStyle('textColor', color.value)}
+                          className={`w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center ${cardState.textColor === color.value
+                            ? 'border-primary scale-110 shadow-md ring-2 ring-primary/20'
+                            : 'border-gray-200 hover:scale-105'
+                            }`}
+                          style={{ backgroundColor: color.value }}
+                          title={color.label}
+                        >
+                          {cardState.textColor === color.value && (
+                            <div className={`w-2.5 h-2.5 rounded-full ${['white', 'gold'].includes(color.id) ? 'bg-black' : 'bg-white'}`} />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Logo Size */}
-                <div>
-                  <label className="text-xs text-textSec mb-1 block flex justify-between">
-                    <span>Logo Size</span>
-                    <span className="text-[10px] bg-gray-100 px-1 rounded">{Math.round((cardState.logoScale || 1) * 100)}%</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="0.5" max="1.5" step="0.1"
-                    value={cardState.logoScale || 1}
-                    onChange={(e) => onUpdateStyle('logoScale', parseFloat(e.target.value))}
-                    className="w-full accent-primary h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                </div>
+                {/* Font Size Selection */}
+                <div className="mt-6 pt-6 border-t border-gray-100">
+                  <label className="text-xs font-bold text-textMain mb-3 block uppercase tracking-wider">Font Size</label>
+                  <div className="flex gap-2">
+                    {['small', 'medium', 'large'].map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => onUpdateStyle('fontSize', size)}
+                        className={`flex-1 py-2 text-xs font-bold rounded-xl border-2 transition-all uppercase tracking-wide ${cardState.fontSize === size
+                          ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105'
+                          : 'bg-white text-textSec border-gray-100 hover:border-primary/30 hover:text-primary'
+                          }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Advanced Layout Controls */}
+                  <div className="mt-6 pt-6 border-t border-gray-100 space-y-4">
+                    <h3 className="text-xs font-bold text-textMain uppercase tracking-wider mb-2">Detailed Adjustments</h3>
 
-                {/* Gradient Opacity */}
-                <div className="col-span-2">
-                  <label className="text-xs text-textSec mb-1 block flex justify-between">
-                    <span>Text Readability (Shadow)</span>
-                    <span className="text-[10px] bg-gray-100 px-1 rounded">{Math.round((cardState.gradientOpacity || 0.8) * 100)}%</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="0" max="1" step="0.1"
-                    value={cardState.gradientOpacity === undefined ? 0.8 : cardState.gradientOpacity}
-                    onChange={(e) => onUpdateStyle('gradientOpacity', parseFloat(e.target.value))}
-                    className="w-full accent-primary h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                  />
+                    {/* Logo Position */}
+                    <div>
+                      <label className="text-xs text-textSec mb-1 block">Logo Position</label>
+                      <div className="grid grid-cols-2 gap-2 max-w-[120px]">
+                        {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map(pos => (
+                          <button
+                            key={pos}
+                            onClick={() => onUpdateStyle('logoPosition', pos)}
+                            className={`h-8 rounded-md border-2 transition-all ${cardState.logoPosition === pos
+                              ? 'bg-primary border-primary'
+                              : 'bg-gray-100 border-transparent hover:bg-gray-200'
+                              }`}
+                            title={pos.replace('-', ' ')}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Sliders Grid */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Text Offset */}
+                      <div>
+                        <label className="text-xs text-textSec mb-1 block flex justify-between">
+                          <span>Text Height</span>
+                          <span className="text-[10px] bg-gray-100 px-1 rounded">{cardState.textYOffset || 0}</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="-50" max="400" step="10"
+                          value={cardState.textYOffset || 0}
+                          onChange={(e) => onUpdateStyle('textYOffset', parseInt(e.target.value))}
+                          className="w-full accent-primary h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
+
+                      {/* Logo Size */}
+                      <div>
+                        <label className="text-xs text-textSec mb-1 block flex justify-between">
+                          <span>Logo Size</span>
+                          <span className="text-[10px] bg-gray-100 px-1 rounded">{Math.round((cardState.logoScale || 1) * 100)}%</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="0.5" max="1.5" step="0.1"
+                          value={cardState.logoScale || 1}
+                          onChange={(e) => onUpdateStyle('logoScale', parseFloat(e.target.value))}
+                          className="w-full accent-primary h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
+
+                      {/* Gradient Opacity */}
+                      <div className="col-span-2">
+                        <label className="text-xs text-textSec mb-1 block flex justify-between">
+                          <span>Text Readability (Shadow)</span>
+                          <span className="text-[10px] bg-gray-100 px-1 rounded">{Math.round((cardState.gradientOpacity || 0.8) * 100)}%</span>
+                        </label>
+                        <input
+                          type="range"
+                          min="0" max="1" step="0.1"
+                          value={cardState.gradientOpacity === undefined ? 0.8 : cardState.gradientOpacity}
+                          onChange={(e) => onUpdateStyle('gradientOpacity', parseFloat(e.target.value))}
+                          className="w-full accent-primary h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
-            </div>
 
+            </div>
           </div>
         </div>
 
-        {/* Section: Content */}
-        <div className="space-y-6">
-          <h3 className="text-sm font-bold text-textSec uppercase tracking-wider flex items-center gap-2">
-            <Type className="w-4 h-4" /> Personalize Content
-          </h3>
-
-          <div>
-            <div className="flex justify-between items-center mb-2 pl-1">
-              <label className="block text-sm font-medium text-textSec">Message</label>
-              <button
-                onClick={handleGenerateWish}
-                disabled={isGenerating}
-                className="text-xs flex items-center gap-1.5 text-primary hover:text-primary/80 font-bold bg-primary/5 px-3 py-1.5 rounded-full hover:bg-primary/10 transition-colors disabled:opacity-50"
-              >
-                {isGenerating ? <RefreshCcw className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
-                {isGenerating ? 'Drafting...' : 'AI Reword'}
-              </button>
-            </div>
-            <textarea
-              value={cardState.customMessage}
-              onChange={(e) => onUpdateMessage(e.target.value)}
-              placeholder={isGenerating ? "Translating..." : `Write your warm ${cardState.selectedFestival?.name} wish here...`}
-              rows={3}
-              maxLength={100}
-              className="w-full p-4 bg-cream border-2 border-transparent rounded-2xl focus:bg-white focus:border-primary/30 focus:ring-4 focus:ring-primary/10 outline-none transition-all resize-none placeholder-gray-400 text-textMain"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-textSec mb-2 pl-1">From Name</label>
-              <input
-                type="text"
-                value={cardState.senderName}
-                onChange={(e) => onUpdateSender(e.target.value)}
-                placeholder="e.g. Dr. Anand"
-                className="w-full p-3 bg-cream border-2 border-transparent rounded-xl focus:bg-white focus:border-primary/30 outline-none transition-all text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-textSec mb-2 pl-1">To (Optional)</label>
-              <input
-                type="text"
-                value={cardState.recipientName}
-                onChange={(e) => onUpdateRecipient(e.target.value)}
-                placeholder="e.g. Priya"
-                className="w-full p-3 bg-cream border-2 border-transparent rounded-xl focus:bg-white focus:border-primary/30 outline-none transition-all text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="pt-6 grid grid-cols-2 gap-3">
-            <button
-              onClick={handleShare}
-              disabled={!imageLoaded}
-              className="col-span-1 bg-gray-900 text-white hover:bg-black font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-            >
-              <Share2 className="w-5 h-5" />
-              Share
-            </button>
-            <button
-              onClick={handleDownload}
-              disabled={!imageLoaded}
-              className="col-span-1 bg-primary hover:bg-[#FF7043] text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-primary/25"
-            >
-              <Download className="w-5 h-5" />
-              Save
-            </button>
-          </div>
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={handleShare}
+            disabled={!imageLoaded}
+            className="col-span-1 bg-gray-900 text-white hover:bg-black font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+          >
+            <Share2 className="w-5 h-5" />
+            Share
+          </button>
+          <button
+            onClick={handleDownload}
+            disabled={!imageLoaded}
+            className="col-span-1 bg-primary hover:bg-[#FF7043] text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-primary/25"
+          >
+            <Download className="w-5 h-5" />
+            Save
+          </button>
         </div>
       </div>
 

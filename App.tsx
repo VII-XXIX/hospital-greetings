@@ -337,7 +337,9 @@ const App: React.FC = () => {
                       )}
                     </div>
                     <div className="flex flex-col items-center">
-                      <span className="font-bold text-textMain text-sm">New Design</span>
+                      <span className="font-bold text-textMain text-sm">
+                        {isGeneratingImg ? 'AI Creating...' : 'New Design'}
+                      </span>
                     </div>
                   </button>
 
