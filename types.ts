@@ -1,4 +1,4 @@
-export type LanguageCode = 'en' | 'ta' | 'kn' | 'hi';
+export type LanguageCode = 'en' | 'ta' | 'kn' | 'hi' | 'te';
 
 export interface Language {
   code: LanguageCode;
@@ -11,6 +11,7 @@ export interface Template {
   imageUrl: string;
   thumbnailUrl: string;
   alt: string;
+  languageCode?: LanguageCode;
 }
 
 export interface Festival {

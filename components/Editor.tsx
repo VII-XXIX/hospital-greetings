@@ -3,6 +3,7 @@ import { Download, Wand2, RefreshCcw, Share2, Type, Palette, Loader2, ChevronRig
 import { CardState } from '../types';
 import { generateAiWish } from '../services/geminiService';
 import { FONT_OPTIONS, COLOR_OPTIONS, HOSPITAL_LOGO_BASE64 } from '../constants';
+import { UI_TRANSLATIONS } from '../translations';
 
 interface EditorProps {
   cardState: CardState;
@@ -25,6 +26,18 @@ export const Editor: React.FC<EditorProps> = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Helper to get localized text
+  const t = (key: string, variables?: Record<string, string | number>) => {
+    const langCode = cardState.selectedLanguage?.code || 'en';
+    let text = UI_TRANSLATIONS[langCode]?.[key] || UI_TRANSLATIONS['en'][key] || key;
+    if (variables) {
+      Object.entries(variables).forEach(([k, v]) => {
+        text = text.replace(`{{${k}}}`, String(v));
+      });
+    }
+    return text;
+  };
 
   // Default dimensions
   // Dynamic dimensions based on aspect ratio
@@ -133,7 +146,7 @@ export const Editor: React.FC<EditorProps> = ({
       ctx.fillStyle = '#ef4444'; // Red text for error
       ctx.font = '20px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText("Failed to load image. Please try again.", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+      ctx.fillText(t('renderingError'), CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
     };
 
     // Finalize
@@ -213,13 +226,13 @@ export const Editor: React.FC<EditorProps> = ({
     ctx.shadowBlur = 4;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
-    ctx.fillText("SOORIYA HOSPITAL", textX, textY - 10);
+    ctx.fillText(t('hospitalName'), textX, textY - 10);
 
     // "GREETINGS"
     ctx.font = '600 20px "Poppins", sans-serif';
     ctx.fillStyle = '#FFCCBC'; // Soft Peach/Orange
     ctx.shadowBlur = 2;
-    ctx.fillText("GREETINGS", textX + (textAlign === 'left' ? 2 : -2), textY + 18);
+    ctx.fillText(t('greetings'), textX + (textAlign === 'left' ? 2 : -2), textY + 18);
 
 
     // 4. MESSAGE CONTENT (Bottom Half)
@@ -258,7 +271,7 @@ export const Editor: React.FC<EditorProps> = ({
     }
 
     // -- Draw Message --
-    const message = cardState.customMessage || (isGenerating ? " Creating your wish..." : `Happy ${cardState.selectedFestival?.name}!`);
+    const message = cardState.customMessage || (isGenerating ? t('drafting') : `${t('happy')} ${cardState.selectedFestival?.name}!`);
     ctx.font = messageFont;
     ctx.fillStyle = cardState.textColor;
 
@@ -359,13 +372,13 @@ export const Editor: React.FC<EditorProps> = ({
         {/* Section: Content (PRIORITY) */}
         <div className="mb-8 pb-8 border-b border-gray-100">
           <h3 className="text-sm font-bold text-textSec uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Type className="w-4 h-4" /> Personalize Content
+            <Type className="w-4 h-4" /> {t('personalize')}
           </h3>
 
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-textSec mb-2 pl-1">From Name</label>
+                <label className="block text-sm font-medium text-textSec mb-2 pl-1">{t('fromName')}</label>
                 <input
                   type="text"
                   value={cardState.senderName}
@@ -385,7 +398,7 @@ export const Editor: React.FC<EditorProps> = ({
                      I will keep 'To' but maybe rename label if needed, but for now prioritization is the key.
                      Let's put 'From' and 'To' first as requested.
                  */}
-                <label className="block text-sm font-medium text-textSec mb-2 pl-1">To (Optional)</label>
+                <label className="block text-sm font-medium text-textSec mb-2 pl-1">{t('toName')}</label>
                 <input
                   type="text"
                   value={cardState.recipientName}
@@ -398,20 +411,20 @@ export const Editor: React.FC<EditorProps> = ({
 
             <div>
               <div className="flex justify-between items-center mb-2 pl-1">
-                <label className="block text-sm font-medium text-textSec">Message</label>
+                <label className="block text-sm font-medium text-textSec">{t('message')}</label>
                 <button
                   onClick={handleGenerateWish}
                   disabled={isGenerating}
                   className="text-xs flex items-center gap-1.5 text-primary hover:text-primary/80 font-bold bg-primary/5 px-3 py-1.5 rounded-full hover:bg-primary/10 transition-colors disabled:opacity-50"
                 >
                   {isGenerating ? <RefreshCcw className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
-                  {isGenerating ? 'Drafting...' : 'AI Reword'}
+                  {isGenerating ? t('drafting') : t('aiReword')}
                 </button>
               </div>
               <textarea
                 value={cardState.customMessage}
                 onChange={(e) => onUpdateMessage(e.target.value)}
-                placeholder={isGenerating ? "Translating..." : `Write your warm ${cardState.selectedFestival?.name} wish here...`}
+                placeholder={isGenerating ? t('translating') : `${t('writeWarm')} ${cardState.selectedFestival?.name} ${t('wishHere')}...`}
                 rows={3}
                 maxLength={100}
                 className="w-full p-4 bg-cream border-2 border-transparent rounded-2xl focus:bg-white focus:border-primary/30 focus:ring-4 focus:ring-primary/10 outline-none transition-all resize-none placeholder-gray-400 text-textMain"
@@ -428,7 +441,7 @@ export const Editor: React.FC<EditorProps> = ({
           >
             <span className="font-bold text-textMain flex items-center gap-2">
               <Palette className="w-4 h-4 text-textSec group-hover:text-primary transition-colors" />
-              Advanced Options
+              {t('advancedOptions')}
             </span>
             <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${showAdvanced ? 'rotate-90' : ''}`} />
           </button>
@@ -439,13 +452,13 @@ export const Editor: React.FC<EditorProps> = ({
               {/* Layout Selection */}
               <div className="mb-8 pb-8 border-b border-gray-100">
                 <h3 className="text-xs font-bold text-textSec uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <Share2 className="w-3 h-3" /> Card Layout
+                  <Share2 className="w-3 h-3" /> {t('cardLayout')}
                 </h3>
                 <div className="flex bg-gray-100 p-1.5 rounded-xl">
                   {[
-                    { id: 'square', label: 'Post (Square)', ratio: '1:1' },
-                    { id: 'portrait', label: 'Card (Portrait)', ratio: '4:5' },
-                    { id: 'story', label: 'Story (Full)', ratio: '9:16' }
+                    { id: 'square', label: t('postSquare'), ratio: '1:1' },
+                    { id: 'portrait', label: t('cardPortrait'), ratio: '4:5' },
+                    { id: 'story', label: t('storyFull'), ratio: '9:16' }
                   ].map((layout) => (
                     <button
                       key={layout.id}
@@ -465,13 +478,13 @@ export const Editor: React.FC<EditorProps> = ({
               {/* Style Customization */}
               <div className="mb-6">
                 <h3 className="text-xs font-bold text-textSec uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <Palette className="w-3 h-3" /> Customize Style
+                  <Palette className="w-3 h-3" /> {t('customizeStyle')}
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {/* Font Selection */}
                   <div>
-                    <label className="text-xs font-semibold text-textMain mb-2 block">Typography</label>
+                    <label className="text-xs font-semibold text-textMain mb-2 block">{t('typography')}</label>
                     <div className="grid grid-cols-2 gap-2">
                       {FONT_OPTIONS.map((font) => (
                         <button
@@ -491,7 +504,7 @@ export const Editor: React.FC<EditorProps> = ({
 
                   {/* Color Selection */}
                   <div>
-                    <label className="text-xs font-semibold text-textMain mb-2 block">Text Color</label>
+                    <label className="text-xs font-semibold text-textMain mb-2 block">{t('textColor')}</label>
                     <div className="flex gap-3">
                       {COLOR_OPTIONS.map((color) => (
                         <button
@@ -515,7 +528,7 @@ export const Editor: React.FC<EditorProps> = ({
 
                 {/* Font Size Selection */}
                 <div className="mt-6 pt-6 border-t border-gray-100">
-                  <label className="text-xs font-bold text-textMain mb-3 block uppercase tracking-wider">Font Size</label>
+                  <label className="text-xs font-bold text-textMain mb-3 block uppercase tracking-wider">{t('fontSize')}</label>
                   <div className="flex gap-2">
                     {['small', 'medium', 'large'].map((size) => (
                       <button
@@ -532,11 +545,11 @@ export const Editor: React.FC<EditorProps> = ({
                   </div>
                   {/* Advanced Layout Controls */}
                   <div className="mt-6 pt-6 border-t border-gray-100 space-y-4">
-                    <h3 className="text-xs font-bold text-textMain uppercase tracking-wider mb-2">Detailed Adjustments</h3>
+                    <h3 className="text-xs font-bold text-textMain uppercase tracking-wider mb-2">{t('detailedAdjustments')}</h3>
 
                     {/* Logo Position */}
                     <div>
-                      <label className="text-xs text-textSec mb-1 block">Logo Position</label>
+                      <label className="text-xs text-textSec mb-1 block">{t('logoPosition')}</label>
                       <div className="grid grid-cols-2 gap-2 max-w-[120px]">
                         {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map(pos => (
                           <button
@@ -557,7 +570,7 @@ export const Editor: React.FC<EditorProps> = ({
                       {/* Text Offset */}
                       <div>
                         <label className="text-xs text-textSec mb-1 block flex justify-between">
-                          <span>Text Height</span>
+                          <span>{t('textHeight')}</span>
                           <span className="text-[10px] bg-gray-100 px-1 rounded">{cardState.textYOffset || 0}</span>
                         </label>
                         <input
@@ -572,7 +585,7 @@ export const Editor: React.FC<EditorProps> = ({
                       {/* Logo Size */}
                       <div>
                         <label className="text-xs text-textSec mb-1 block flex justify-between">
-                          <span>Logo Size</span>
+                          <span>{t('logoSize')}</span>
                           <span className="text-[10px] bg-gray-100 px-1 rounded">{Math.round((cardState.logoScale || 1) * 100)}%</span>
                         </label>
                         <input
@@ -587,7 +600,7 @@ export const Editor: React.FC<EditorProps> = ({
                       {/* Gradient Opacity */}
                       <div className="col-span-2">
                         <label className="text-xs text-textSec mb-1 block flex justify-between">
-                          <span>Text Readability (Shadow)</span>
+                          <span>{t('readability')}</span>
                           <span className="text-[10px] bg-gray-100 px-1 rounded">{Math.round((cardState.gradientOpacity || 0.8) * 100)}%</span>
                         </label>
                         <input
@@ -616,7 +629,7 @@ export const Editor: React.FC<EditorProps> = ({
             className="col-span-1 bg-gray-900 text-white hover:bg-black font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
           >
             <Share2 className="w-5 h-5" />
-            Share
+            {t('share')}
           </button>
           <button
             onClick={handleDownload}
@@ -624,7 +637,7 @@ export const Editor: React.FC<EditorProps> = ({
             className="col-span-1 bg-primary hover:bg-[#FF7043] text-white font-semibold py-4 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-primary/25"
           >
             <Download className="w-5 h-5" />
-            Save
+            {t('save')}
           </button>
         </div>
       </div>
@@ -644,7 +657,7 @@ export const Editor: React.FC<EditorProps> = ({
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 backdrop-blur-[2px] rounded-xl transition-all duration-300">
               <div className="flex flex-col items-center justify-center p-6 bg-white rounded-2xl shadow-xl border border-primary/20 animate-fade-in-up">
                 <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
-                <p className="text-xs font-bold text-primary uppercase tracking-wider animate-pulse">Rendering your card...</p>
+                <p className="text-xs font-bold text-primary uppercase tracking-wider animate-pulse">{t('rendering')}</p>
               </div>
             </div>
           )}
@@ -662,10 +675,10 @@ export const Editor: React.FC<EditorProps> = ({
             </div>
 
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">AI Writing Your Wish...</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{t('aiWriting')}</h3>
               <p className="text-gray-500 text-sm">
-                Gemini is crafting a personalized message in {cardState.selectedLanguage?.name}.
-                <br />This usually takes a few seconds.
+                {t('aiCrafting')}
+                <br />{t('takesSeconds')}
               </p>
             </div>
 

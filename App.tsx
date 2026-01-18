@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { generateFestivalImage } from './services/geminiService';
 import { useScrollReveal } from './hooks/useScrollReveal';
+import { UI_TRANSLATIONS } from './translations';
 
 const App: React.FC = () => {
   const [state, setState] = useState<CardState>({
@@ -129,6 +130,18 @@ const App: React.FC = () => {
     });
   };
 
+  // Helper to get localized text
+  const t = (key: string, variables?: Record<string, string | number>) => {
+    const langCode = state.selectedLanguage?.code || 'en';
+    let text = UI_TRANSLATIONS[langCode]?.[key] || UI_TRANSLATIONS['en'][key] || key;
+    if (variables) {
+      Object.entries(variables).forEach(([k, v]) => {
+        text = text.replace(`{{${k}}}`, String(v));
+      });
+    }
+    return text;
+  };
+
   const nextStep = () => {
     // Scroll to top smoothly
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -215,14 +228,14 @@ const App: React.FC = () => {
                 <div className="text-center mb-12 pt-8">
                   <div className="inline-flex items-center justify-center p-2 bg-white rounded-full shadow-sm mb-6 animate-fade-in-up stagger-1">
                     <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase tracking-wider flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-current" /> Free Generator
+                      <Star className="w-3 h-3 fill-current" /> {t('freeGenerator')}
                     </span>
                   </div>
                   <h1
                     className="text-4xl md:text-5xl font-bold text-textMain mb-4 leading-tight font-display animate-fade-in-up stagger-2"
                     style={{ transform: `translate(${mousePos.x * -1}px, ${mousePos.y * -1}px)` }}
                   >
-                    Share Your <span className="text-primary">Best Wishes</span>
+                    {t('heroTitle')} <span className="text-primary">{t('heroTitleHighlight')}</span>
                   </h1>
 
                   {/* Floating Elements for Parallax */}
@@ -234,7 +247,7 @@ const App: React.FC = () => {
                   </div>
 
                   <p className="text-textSec text-lg max-w-xl mx-auto leading-relaxed animate-fade-in-up stagger-3">
-                    Create beautiful greeting cards for upcoming festivals and special days in seconds.
+                    {t('heroSubtitle')}
                   </p>
                 </div>
 
@@ -252,9 +265,9 @@ const App: React.FC = () => {
                     // Determine badge text
                     let badgeText = '';
                     if (index === 0) {
-                      if (daysRemaining === 0) badgeText = 'HAPPENING TODAY';
-                      else if (daysRemaining === 1) badgeText = 'TOMORROW';
-                      else badgeText = `IN ${daysRemaining} DAYS`;
+                      if (daysRemaining === 0) badgeText = t('happeningToday');
+                      else if (daysRemaining === 1) badgeText = t('tomorrow');
+                      else badgeText = t('inDays', { count: daysRemaining });
                     }
 
                     return (
@@ -278,12 +291,12 @@ const App: React.FC = () => {
                   <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
                     <ArrowLeft className="w-4 h-4" />
                   </div>
-                  Go Back
+                  {t('goBack')}
                 </button>
 
                 <div className="text-center mb-10">
-                  <h2 className="text-3xl font-bold text-textMain mb-3 font-display">Choose Language</h2>
-                  <p className="text-textSec">Which language speaks to your heart?</p>
+                  <h2 className="text-3xl font-bold text-textMain mb-3 font-display">{t('chooseLanguage')}</h2>
+                  <p className="text-textSec">{t('languageSubtitle')}</p>
                 </div>
 
                 <div className="space-y-4">
@@ -314,12 +327,12 @@ const App: React.FC = () => {
                   <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
                     <ArrowLeft className="w-4 h-4" />
                   </div>
-                  Back
+                  {t('back')}
                 </button>
 
                 <div className="text-center mb-10">
-                  <h2 className="text-3xl font-bold text-textMain mb-3 font-display">Pick a Design</h2>
-                  <p className="text-textSec">Select a beautiful background or create a unique one.</p>
+                  <h2 className="text-3xl font-bold text-textMain mb-3 font-display">{t('pickDesign')}</h2>
+                  <p className="text-textSec">{t('designSubtitle')}</p>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
@@ -338,7 +351,7 @@ const App: React.FC = () => {
                     </div>
                     <div className="flex flex-col items-center">
                       <span className="font-bold text-textMain text-sm">
-                        {isGeneratingImg ? 'AI Creating...' : 'New Design'}
+                        {isGeneratingImg ? t('aiCreating') : t('newDesign')}
                       </span>
                     </div>
                   </button>
@@ -358,35 +371,37 @@ const App: React.FC = () => {
                       />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
                         <div className="bg-white text-primary px-5 py-2.5 rounded-full font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                          Select This
+                          {t('selectThis')}
                         </div>
                       </div>
                       <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md text-primary text-[10px] px-2.5 py-1 rounded-full font-bold shadow-sm flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" /> New
+                        <Sparkles className="w-3 h-3" /> {t('new')}
                       </div>
                     </button>
                   ))}
 
                   {/* Static Templates */}
-                  {state.selectedFestival.templates.map(template => (
-                    <button
-                      key={template.id}
-                      onClick={() => handleTemplateSelect(template)}
-                      className="group relative rounded-3xl overflow-hidden aspect-[3/4] shadow-card hover:shadow-card-hover transition-all duration-300 transform hover:-translate-y-1"
-                    >
-                      <img
-                        src={template.thumbnailUrl}
-                        alt={template.alt}
-                        crossOrigin="anonymous"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                        <div className="bg-white text-primary px-5 py-2.5 rounded-full font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                          Select This
+                  {state.selectedFestival.templates
+                    .filter(t => !t.languageCode || t.languageCode === state.selectedLanguage?.code)
+                    .map(template => (
+                      <button
+                        key={template.id}
+                        onClick={() => handleTemplateSelect(template)}
+                        className="group relative rounded-3xl overflow-hidden aspect-[3/4] shadow-card hover:shadow-card-hover transition-all duration-300 transform hover:-translate-y-1"
+                      >
+                        <img
+                          src={template.thumbnailUrl}
+                          alt={template.alt}
+                          crossOrigin="anonymous"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                          <div className="bg-white text-primary px-5 py-2.5 rounded-full font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                            {t('selectThis')}
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))}
                 </div>
               </div>
             )}
@@ -398,7 +413,7 @@ const App: React.FC = () => {
                   <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
                     <ArrowLeft className="w-4 h-4" />
                   </div>
-                  Back to Designs
+                  {t('backToDesigns')}
                 </button>
 
                 <Editor
@@ -414,7 +429,7 @@ const App: React.FC = () => {
                     onClick={reset}
                     className="text-textSec hover:text-primary text-sm font-medium transition-colors flex items-center gap-2 mx-auto px-4 py-2 rounded-full hover:bg-white hover:shadow-sm"
                   >
-                    Make Another Card
+                    {t('makeAnother')}
                   </button>
                 </div>
               </div>
