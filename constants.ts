@@ -91,12 +91,12 @@ const createAssetTemplate = (id: string, name: string, colorPair: [string, strin
 const THEMES = {
   purple: ['#9333EA', '#FAF5FF'] as [string, string],
   orange: ['#EA580C', '#FFF7ED'] as [string, string],
-  blue:   ['#2563EB', '#EFF6FF'] as [string, string],
+  blue: ['#2563EB', '#EFF6FF'] as [string, string],
   yellow: ['#CA8A04', '#FEFCE8'] as [string, string],
-  pink:   ['#DB2777', '#FDF2F8'] as [string, string],
-  red:    ['#DC2626', '#FEF2F2'] as [string, string],
-  green:  ['#059669', '#ECFDF5'] as [string, string],
-  gold:   ['#B45309', '#FFFBEB'] as [string, string],
+  pink: ['#DB2777', '#FDF2F8'] as [string, string],
+  red: ['#DC2626', '#FEF2F2'] as [string, string],
+  green: ['#059669', '#ECFDF5'] as [string, string],
+  gold: ['#B45309', '#FFFBEB'] as [string, string],
   tricolor: ['#EA580C', '#F0F9FF'] as [string, string], // Saffron-ish on light blue
 };
 
@@ -132,9 +132,9 @@ export const FESTIVALS: Festival[] = [
     dateIso: '2025-01-26',
     color: 'bg-blue-100 text-blue-800',
     templates: [
-      createAssetTemplate('rep-1', 'Patriotic Minimal', THEMES.blue, 'geometric'),
-      createAssetTemplate('rep-2', 'Tri-Color Vibe', THEMES.tricolor, 'gradient'),
-      createAssetTemplate('rep-3', 'Freedom Waves', THEMES.blue, 'organic'),
+      { id: 'rep-1', imageUrl: '/templates/republic_1.jpg', thumbnailUrl: '/templates/republic_1.jpg', alt: 'Republic Day Greeting' },
+      { id: 'rep-2', imageUrl: '/templates/republic_2.jpg', thumbnailUrl: '/templates/republic_2.jpg', alt: 'Independence & Unity' },
+      { id: 'rep-3', imageUrl: '/templates/republic_3.jpg', thumbnailUrl: '/templates/republic_3.jpg', alt: 'India Republic Day Poster' },
     ],
   },
   {
