@@ -1,5 +1,5 @@
 // Secure API Service - Calls backend instead of Gemini directly
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3002';
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
 
 // 1. Native Translations for Festivals to ensure 100% localized fallbacks
 const FESTIVAL_TRANSLATIONS: Record<string, Record<string, string>> = {
