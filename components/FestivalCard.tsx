@@ -1,17 +1,23 @@
 import React, { useRef, useState } from 'react';
 import { Sparkles, ChevronRight, Sun, Flag, Flame, Heart, Flower2, Moon, Stethoscope, Wrench, Gift, PartyPopper, Crown } from 'lucide-react';
-import { Festival } from '../types';
+import { Festival, LanguageCode } from '../types';
+import { UI_TRANSLATIONS } from '../translations';
 
 interface FestivalCardProps {
     festival: Festival;
     index: number;
     badgeText?: string;
     onClick: () => void;
+    languageCode: LanguageCode;
 }
 
-export const FestivalCard: React.FC<FestivalCardProps> = ({ festival, index, badgeText, onClick }) => {
+export const FestivalCard: React.FC<FestivalCardProps> = ({ festival, index, badgeText, onClick, languageCode }) => {
     const cardRef = useRef<HTMLButtonElement>(null);
     const [rotation, setRotation] = useState({ x: 0, y: 0 });
+
+    const t = (key: string) => {
+        return UI_TRANSLATIONS[languageCode]?.[key] || UI_TRANSLATIONS['en'][key] || key;
+    };
 
     // 3D Tilt Logic
     const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -104,7 +110,7 @@ export const FestivalCard: React.FC<FestivalCardProps> = ({ festival, index, bad
                     </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-textMain mb-1 font-display text-center" style={{ transform: `translateZ(10px)` }}>{festival.name}</h3>
+                <h3 className="text-xl font-bold text-textMain mb-1 font-display text-center" style={{ transform: `translateZ(10px)` }}>{t(festival.id)}</h3>
                 <span className={`text-xs font-bold px-3 py-1 rounded-full mt-2 transition-colors ${index === 0
                     ? 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white'
                     : 'bg-cream text-textSec group-hover:bg-primary group-hover:text-white'
@@ -115,7 +121,7 @@ export const FestivalCard: React.FC<FestivalCardProps> = ({ festival, index, bad
 
             <div className="border-t border-gray-50 pt-3 mt-auto relative z-10">
                 <div className="flex items-center justify-center text-sm text-primary font-medium opacity-60 group-hover:opacity-100 transition-opacity duration-300">
-                    Create Card <ChevronRight className="w-4 h-4 ml-1" />
+                    {t('createCard')} <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
             </div>
         </button>

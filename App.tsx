@@ -277,6 +277,7 @@ const App: React.FC = () => {
                         index={index}
                         badgeText={badgeText}
                         onClick={() => handleFestivalSelect(festival)}
+                        languageCode={state.selectedLanguage?.code || 'en'}
                       />
                     );
                   })}
@@ -331,7 +332,9 @@ const App: React.FC = () => {
                 </button>
 
                 <div className="text-center mb-10">
-                  <h2 className="text-3xl font-bold text-textMain mb-3 font-display">{t('pickDesign')}</h2>
+                  <h2 className="text-3xl font-bold text-textMain mb-3 font-display">
+                    {t('pickDesign')} {t('for')} {t(state.selectedFestival?.id || '')}
+                  </h2>
                   <p className="text-textSec">{t('designSubtitle')}</p>
                 </div>
 

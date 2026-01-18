@@ -271,7 +271,7 @@ export const Editor: React.FC<EditorProps> = ({
     }
 
     // -- Draw Message --
-    const message = cardState.customMessage || (isGenerating ? t('drafting') : `${t('happy')} ${cardState.selectedFestival?.name}!`);
+    const message = cardState.customMessage || (isGenerating ? t('drafting') : `${t('happy')} ${t(cardState.selectedFestival?.id || '')}!`);
     ctx.font = messageFont;
     ctx.fillStyle = cardState.textColor;
 
@@ -424,7 +424,7 @@ export const Editor: React.FC<EditorProps> = ({
               <textarea
                 value={cardState.customMessage}
                 onChange={(e) => onUpdateMessage(e.target.value)}
-                placeholder={isGenerating ? t('translating') : `${t('writeWarm')} ${cardState.selectedFestival?.name} ${t('wishHere')}...`}
+                placeholder={isGenerating ? t('translating') : `${t('writeWarm')} ${t(cardState.selectedFestival?.id || '')} ${t('wishHere')}...`}
                 rows={3}
                 maxLength={100}
                 className="w-full p-4 bg-cream border-2 border-transparent rounded-2xl focus:bg-white focus:border-primary/30 focus:ring-4 focus:ring-primary/10 outline-none transition-all resize-none placeholder-gray-400 text-textMain"
