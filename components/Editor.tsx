@@ -226,13 +226,13 @@ export const Editor: React.FC<EditorProps> = ({
     ctx.shadowBlur = 4;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
-    ctx.fillText(t('hospitalName'), textX, textY - 10);
+    ctx.fillText('SOORIYA HOSPITAL', textX, textY - 10);
 
     // "GREETINGS"
     ctx.font = '600 20px "Poppins", sans-serif';
     ctx.fillStyle = '#FFCCBC'; // Soft Peach/Orange
     ctx.shadowBlur = 2;
-    ctx.fillText(t('greetings'), textX + (textAlign === 'left' ? 2 : -2), textY + 18);
+    ctx.fillText('GREETINGS', textX + (textAlign === 'left' ? 2 : -2), textY + 18);
 
 
     // 4. MESSAGE CONTENT (Bottom Half)
