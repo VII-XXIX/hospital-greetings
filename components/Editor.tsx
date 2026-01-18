@@ -308,13 +308,15 @@ export const Editor: React.FC<EditorProps> = ({
     setIsGenerating(false);
   };
 
-  // Auto-generate wish on mount if message is empty to ensure correct language
+  // No longer auto-generating wish on mount to avoid blocking the user
+  // Default message will be used if customMessage is empty
+  /* 
   useEffect(() => {
     if (!cardState.customMessage) {
       handleGenerateWish();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  */
 
   const handleDownload = () => {
     if (downloadUrl) {
@@ -660,10 +662,10 @@ export const Editor: React.FC<EditorProps> = ({
             </div>
 
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Generating Masterpiece...</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">AI Writing Your Wish...</h3>
               <p className="text-gray-500 text-sm">
-                Creating a high-quality, unique design just for you.
-                <br />This usually takes <b>15-20 seconds</b>.
+                Gemini is crafting a personalized message in {cardState.selectedLanguage?.name}.
+                <br />This usually takes a few seconds.
               </p>
             </div>
 
