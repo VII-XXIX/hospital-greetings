@@ -75,7 +75,7 @@ app.post('/api/generate-image', async (req, res) => {
                 Include visual details like lighting, colors, and specific cultural elements. 
                 Keep it under 40 words. Focus on aesthetics.`;
 
-                const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+                const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
                 const result = await model.generateContent(enhancementPrompt);
                 const aiText = await result.response.text();
                 if (aiText) prompt = aiText.trim();
@@ -194,8 +194,8 @@ app.post('/api/generate-wish', async (req, res) => {
                 Include From: ${senderName} and To: ${recipientName}. 
                 Use ${language} script. Max 15 words. Just the greeting.`;
 
-                const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
-                console.log('🤖 Sending prompt to Gemini (2.5-flash)...');
+                const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+                console.log('🤖 Sending prompt to Gemini (1.5-flash)...');
                 const result = await model.generateContent(prompt);
                 const response = await result.response;
                 const text = response.text().trim();
