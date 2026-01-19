@@ -132,7 +132,8 @@ const App: React.FC = () => {
 
   // Helper to get localized text
   const t = (key: string, variables?: Record<string, string | number>) => {
-    const langCode = state.selectedLanguage?.code || 'en';
+    // Keep UI in English to avoid changing the whole website
+    const langCode = 'en';
     let text = UI_TRANSLATIONS[langCode]?.[key] || UI_TRANSLATIONS['en'][key] || key;
     if (variables) {
       Object.entries(variables).forEach(([k, v]) => {
@@ -216,7 +217,7 @@ const App: React.FC = () => {
       <BackgroundGradient />
 
       <div className="relative z-10">
-        <Header />
+        <Header onLogoClick={reset} />
 
         <main className="max-w-4xl mx-auto">
           <StepWizard currentStep={state.step} totalSteps={4} />
@@ -226,11 +227,6 @@ const App: React.FC = () => {
             {state.step === 1 && (
               <div className="animate-fade-in-up">
                 <div className="text-center mb-12 pt-8">
-                  <div className="inline-flex items-center justify-center p-2 bg-white rounded-full shadow-sm mb-6 animate-fade-in-up stagger-1">
-                    <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase tracking-wider flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-current" /> {t('freeGenerator')}
-                    </span>
-                  </div>
                   <h1
                     className="text-4xl md:text-5xl font-bold text-textMain mb-4 leading-tight font-display animate-fade-in-up stagger-2"
                     style={{ transform: `translate(${mousePos.x * -1}px, ${mousePos.y * -1}px)` }}
@@ -245,10 +241,6 @@ const App: React.FC = () => {
                   <div className="absolute top-40 right-20 opacity-10 hidden md:block" style={{ transform: `translate(${mousePos.x * -1.5}px, ${mousePos.y * 3}px)` }}>
                     <Star className="w-16 h-16 text-secondary" />
                   </div>
-
-                  <p className="text-textSec text-lg max-w-xl mx-auto leading-relaxed animate-fade-in-up stagger-3">
-                    {t('heroSubtitle')}
-                  </p>
                 </div>
 
                 <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 animate-fade-in-up stagger-3">
