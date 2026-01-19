@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Download, Wand2, RefreshCcw, Share2, Type, Palette, Loader2, ChevronRight } from 'lucide-react';
 import { CardState } from '../types';
 import { generateAiWish } from '../services/geminiService';
-import { FONT_OPTIONS, COLOR_OPTIONS, HOSPITAL_LOGO_BASE64 } from '../constants';
+import { FONT_OPTIONS, COLOR_OPTIONS, HOSPITAL_LOGO_BASE64, HOSPITAL_STAFF_DESIGNATIONS } from '../constants';
 import { UI_TRANSLATIONS } from '../translations';
 
 interface EditorProps {
@@ -270,6 +270,21 @@ export const Editor: React.FC<EditorProps> = ({
       currentY -= 80;
     }
 
+    // -- Draw Designation (Recipient) --
+    if (cardState.recipientName) {
+      ctx.font = `600 ${baseSize * 0.7}px ${selectedFont}`;
+      ctx.fillStyle = cardState.textColor;
+      ctx.shadowColor = isDarkText ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)";
+      ctx.shadowBlur = 6;
+
+      const salutation = cardState.selectedLanguage?.code === 'ta'
+        ? `அன்பார்ந்த ${cardState.recipientName},`
+        : `Dear ${cardState.recipientName},`;
+
+      ctx.fillText(salutation, CANVAS_WIDTH / 2, currentY - 20);
+      currentY -= 90;
+    }
+
     // -- Draw Message --
     const message = cardState.customMessage || (isGenerating ? t('drafting') : `${t('happy')} ${t(cardState.selectedFestival?.id || '')}!`);
     ctx.font = messageFont;
@@ -388,24 +403,19 @@ export const Editor: React.FC<EditorProps> = ({
                 />
               </div>
               <div>
-                {/* Replaced 'To' with 'Festive Name' conceptual equivalent if 'To' was deemed less important, 
-                     but user asked for 'festive name is important' which usually implies the greeting text or the festival name itself. 
-                     The current codebase has 'Recipient Name' as 'To'. 
-                     The user said "festive name is important". 
-                     If 'Festive Name' refers to the Festival Name itself, it's already selected. 
-                     If it refers to a custom text for the festival, it might be the message.
-                     The user also said "from name sender is import".
-                     I will keep 'To' but maybe rename label if needed, but for now prioritization is the key.
-                     Let's put 'From' and 'To' first as requested.
-                 */}
                 <label className="block text-sm font-medium text-textSec mb-2 pl-1">{t('toName')}</label>
-                <input
-                  type="text"
+                <select
                   value={cardState.recipientName}
                   onChange={(e) => onUpdateRecipient(e.target.value)}
-                  placeholder="e.g. Priya"
-                  className="w-full p-3 bg-cream border-2 border-transparent rounded-xl focus:bg-white focus:border-primary/30 outline-none transition-all text-sm"
-                />
+                  className="w-full p-3 bg-cream border-2 border-transparent rounded-xl focus:bg-white focus:border-primary/30 outline-none transition-all text-sm appearance-none cursor-pointer"
+                >
+                  <option value="" disabled>{t('selectDesignation') || 'Select Designation'}</option>
+                  {HOSPITAL_STAFF_DESIGNATIONS.map((designation) => (
+                    <option key={designation} value={designation}>
+                      {designation}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
